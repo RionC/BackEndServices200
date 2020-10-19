@@ -17,8 +17,6 @@ namespace LibraryApi.Controllers
             _systemTime = systemTime;
         }
 
-
-
         // GET /serverstatus
         [HttpGet("/serverstatus")]
         public ActionResult GetTheServerStatus()
@@ -32,6 +30,5 @@ namespace LibraryApi.Controllers
             return Ok(response);
         }
 
- 
     }
 }
