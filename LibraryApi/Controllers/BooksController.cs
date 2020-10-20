@@ -17,8 +17,8 @@ namespace LibraryApi.Controllers
 {
     public class BooksController : ControllerBase
     {
-        private IQueryForBooks _booksQuery;
-        private IDoBookCommands _bookCommands;
+        private readonly IQueryForBooks _booksQuery;
+        private readonly IDoBookCommands _bookCommands;
 
         public BooksController(IQueryForBooks booksQuery, IDoBookCommands bookCommands)
         {
@@ -94,14 +94,7 @@ namespace LibraryApi.Controllers
         {
             GetBookDetailsResponse book = await _booksQuery.GetBookById(bookId);
 
-            if (book == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return Ok(book);
-            }
+            return this.Maybe(book);
         }
 
 

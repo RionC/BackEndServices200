@@ -44,6 +44,7 @@ namespace LibraryApi
             var mapperConfig = new MapperConfiguration(opt =>
             {
                 opt.AddProfile<BooksProfile>();
+                opt.AddProfile<ReservationsProfile>();
             });
 
             IMapper mapper = mapperConfig.CreateMapper();
@@ -53,6 +54,12 @@ namespace LibraryApi
 
             services.AddScoped<IQueryForBooks, EfLibraryData>();
             services.AddScoped<IDoBookCommands, EfLibraryData>();
+
+            services.AddDistributedRedisCache(options =>
+            {
+                options.Configuration = Configuration.GetConnectionString("redis");
+            });
+            services.AddTransient<ICacheTheCatalog, CatalogService>();
 
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
