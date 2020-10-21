@@ -3,6 +3,7 @@ using AutoMapper.QueryableExtensions;
 using LibraryApi.Domain;
 using LibraryApi.Filters;
 using LibraryApi.Models.Reservations;
+using LibraryApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -17,12 +18,14 @@ namespace LibraryApi.Controllers
         private readonly LibraryDataContext _context;
         private readonly IMapper _mapper;
         private readonly MapperConfiguration _config;
+        private readonly ILogReservations _reservationLogger;
 
-        public ReservationsController(LibraryDataContext context, IMapper mapper, MapperConfiguration config)
+        public ReservationsController(LibraryDataContext context, IMapper mapper, MapperConfiguration config, ILogReservations reservationLogger)
         {
             _context = context;
             _mapper = mapper;
             _config = config;
+            _reservationLogger = reservationLogger;
         }
 
         [HttpPost("reservations")]
@@ -35,8 +38,7 @@ namespace LibraryApi.Controllers
             
             await _context.SaveChangesAsync();
             var response = _mapper.Map<ReservationDetailsResponse>(reservation);
-            //await Task.Delay(response.Items.Split(',').Count() * 1000);
-            //response.AvailableOn = DateTime.Now.AddDays(1);
+            await _reservationLogger.WriteAsync(reservation);
             
             return CreatedAtRoute("reservations#getbyid", new { id = response.Id }, response);
         }
