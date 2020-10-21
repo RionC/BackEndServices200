@@ -51,5 +51,83 @@ namespace LibraryApi.Controllers
                 .SingleOrDefaultAsync(r => r.Id == id);
             return this.Maybe(reservation);
         }
+
+        [HttpPost("/reservations/accepted")]
+        [ValidateModel]
+        public async Task<ActionResult> ApproveReservation([FromBody] ReservationDetailsResponse reservation)
+        {
+            var res = await _context.Reservations.SingleOrDefaultAsync(r => r.Id == reservation.Id);
+            if (res != null)
+            {
+                res.Status = ReservationStatus.Accepted;
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpPost("/reservations/rejected")]
+        [ValidateModel]
+        public async Task<ActionResult> RejectReservation([FromBody] ReservationDetailsResponse reservation)
+        {
+            var res = await _context.Reservations.SingleOrDefaultAsync(r => r.Id == reservation.Id);
+            if (res != null)
+            {
+                res.Status = ReservationStatus.Rejected;
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("/reservations/accepted")]
+        public async Task<ActionResult> AcceptedReservations()
+        {
+            var data = await _context.Reservations
+                .Where(r => r.Status == ReservationStatus.Accepted)
+                .ProjectTo<ReservationDetailsResponse>(_config)
+                .ToListAsync();
+
+            return Ok(new { data, status = ReservationStatus.Accepted });
+        }
+
+        [HttpGet("/reservations/rejected")]
+        public async Task<ActionResult> RejectedReservations()
+        {
+            var data = await _context.Reservations
+                .Where(r => r.Status == ReservationStatus.Rejected)
+                .ProjectTo<ReservationDetailsResponse>(_config)
+                .ToListAsync();
+
+            return Ok(new { data, status = ReservationStatus.Rejected });
+        }
+
+        [HttpGet("/reservations")]
+        public async Task<ActionResult> AllReservations()
+        {
+            var data = await _context.Reservations
+                //.Where(r => r.Status == ReservationStatus.Rejected)
+                .ProjectTo<ReservationDetailsResponse>(_config)
+                .ToListAsync();
+
+            return Ok(new { data, status = "All" });
+        }
+
+        [HttpGet("/reservations/pending")]
+        public async Task<ActionResult> PendingReservations()
+        {
+            var data = await _context.Reservations
+               .Where(r => r.Status == ReservationStatus.Pending)
+                .ProjectTo<ReservationDetailsResponse>(_config)
+                .ToListAsync();
+
+            return Ok(new { data, status = ReservationStatus.Pending });
+        }
     }
 }
